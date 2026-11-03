@@ -1,0 +1,1648 @@
+﻿==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\inicio\inicio.css
+==========================================
+:host {
+  display: block;
+}
+
+.presentacion {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 48px;
+  padding: 32px 0 64px;
+}
+
+.etiqueta {
+  display: inline-block;
+  color: #17645a;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+h1 {
+  margin: 20px 0;
+  max-width: 620px;
+}
+
+h2 {
+  font-size: 28px;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 17px;
+}
+
+.descripcion {
+  font-size: 17px;
+  max-width: 560px;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.boton {
+  display: inline-block;
+  padding: 13px 20px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+}
+
+.principal {
+  background: #145451;
+  color: white;
+}
+
+.secundario {
+  background: white;
+  color: #145451;
+  border-color: #145451;
+}
+
+.boton:hover {
+  filter: brightness(0.94);
+}
+
+.boton:focus-visible {
+  outline: 3px solid #16856c;
+  outline-offset: 4px;
+}
+
+.nota {
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.tarjeta-comunidad {
+  background: #edf5f3;
+  border: 1px solid #cfe3dd;
+  border-radius: 18px;
+  padding: 30px;
+}
+
+.tarjeta-comunidad h2 {
+  margin: 14px 0 24px;
+  font-size: 25px;
+}
+
+.beneficio {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #d5f5e9;
+  color: #145451;
+  font-weight: bold;
+}
+
+.beneficio h3 {
+  margin: 0 0 6px;
+}
+
+.beneficio p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.como-funciona {
+  padding: 36px 0 60px;
+}
+
+.encabezado-seccion {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.encabezado-seccion h2 {
+  margin-bottom: 10px;
+}
+
+.pasos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.paso {
+  padding: 26px;
+  background: white;
+  border: 1px solid #dce5e3;
+  border-radius: 12px;
+}
+
+.paso p {
+  margin-bottom: 0;
+  font-size: 15px;
+}
+
+.invitacion {
+  padding: 44px 24px;
+  border-radius: 16px;
+  background: #145451;
+  color: white;
+  text-align: center;
+}
+
+.invitacion h2 {
+  margin-top: 0;
+}
+
+.invitacion p {
+  max-width: 600px;
+  margin: 0 auto 24px;
+  color: #d6eee8;
+}
+
+.invitacion .boton {
+  background: #68f0c0;
+  color: #103f3c;
+}
+
+.invitacion .boton:focus-visible {
+  outline-color: white;
+}
+
+@media (max-width: 800px) {
+  .presentacion {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 10px;
+  }
+
+  .pasos {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-comunidad {
+    padding: 24px;
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\inicio\inicio.html
+==========================================
+<section class="presentacion">
+  <div>
+    <span class="etiqueta">COMUNIDAD ESTUDIANTIL Â· HUANCAYO</span>
+
+    <h1>Comparte conocimiento, construye comunidad</h1>
+
+    <p class="descripcion">
+      Intercambia libros, comparte apuntes digitales y encuentra
+      apoyo acadÃ©mico entre estudiantes de Huancayo.
+      Aprender y ayudar nos acerca.
+    </p>
+
+    <div class="acciones">
+      <a routerLink="/recursos" class="boton principal">
+        Explorar recursos â†’
+      </a>
+
+      <a routerLink="/registro" class="boton secundario">
+        Registrarme
+      </a>
+    </div>
+
+    <p class="nota">Intercambio solidario Â· Sin compras ni suscripciones</p>
+  </div>
+
+  <aside class="tarjeta-comunidad" aria-labelledby="titulo-comunidad">
+    <span class="etiqueta">APRENDER EN COMUNIDAD</span>
+    <h2 id="titulo-comunidad">Lo que sabes puede ayudar a alguien mÃ¡s</h2>
+
+    <div class="beneficio">
+      <span class="numero" aria-hidden="true">01</span>
+      <div>
+        <h3>Libros que siguen enseÃ±ando</h3>
+        <p>Comparte los materiales que ya utilizaste.</p>
+      </div>
+    </div>
+
+    <div class="beneficio">
+      <span class="numero" aria-hidden="true">02</span>
+      <div>
+        <h3>Apuntes para avanzar</h3>
+        <p>Encuentra material compartido por otros estudiantes.</p>
+      </div>
+    </div>
+
+    <div class="beneficio">
+      <span class="numero" aria-hidden="true">03</span>
+      <div>
+        <h3>Apoyo entre compaÃ±eros</h3>
+        <p>Construyamos una comunidad basada en la reciprocidad.</p>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<section class="como-funciona" aria-labelledby="titulo-pasos">
+  <div class="encabezado-seccion">
+    <span class="etiqueta">COMPARTIR ES SENCILLO</span>
+    <h2 id="titulo-pasos">PrÃ©stamo solidario de materiales</h2>
+    <p>Encuentra recursos y coordina su prÃ©stamo en tres pasos.</p>
+  </div>
+
+  <div class="pasos">
+    <article class="paso">
+      <span class="numero">1</span>
+      <h3>Busca en el catÃ¡logo</h3>
+      <p>
+        Explora libros y apuntes educativos para encontrar
+        material relacionado con tus cursos.
+      </p>
+    </article>
+
+    <article class="paso">
+      <span class="numero">2</span>
+      <h3>Solicita y coordina</h3>
+      <p>
+        EnvÃ­a una solicitud de prÃ©stamo. Cuando sea aceptada,
+        acuerda con el propietario dÃ³nde recoger el material.
+      </p>
+    </article>
+
+    <article class="paso">
+      <span class="numero">3</span>
+      <h3>Devuelve y ayuda</h3>
+      <p>
+        Cuida el material y devuÃ©lvelo en la fecha acordada
+        para que otros estudiantes tambiÃ©n puedan utilizarlo.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section class="invitacion">
+  <h2>Tu prÃ³ximo aporte puede marcar la diferencia</h2>
+  <p>
+    Ãšnete a una red de colaboraciÃ³n estudiantil de Huancayo.
+    Comparte lo que tienes y aprende con los demÃ¡s.
+  </p>
+
+  <a routerLink="/registro" class="boton">
+    Crear mi cuenta
+  </a>
+</section>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\inicio\inicio.spec.ts
+==========================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Inicio } from './inicio';
+
+describe('Inicio', () => {
+  let component: Inicio;
+  let fixture: ComponentFixture<Inicio>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Inicio],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Inicio);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\inicio\inicio.ts
+==========================================
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-inicio',
+  standalone: true,
+  imports: [RouterLink],
+  templateUrl: './inicio.html',
+  styleUrl: './inicio.css'
+})
+export class Inicio {}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\login\login.css
+==========================================
+:host {
+  display: block;
+}
+
+.acceso {
+  width: 100%;
+  max-width: 460px;
+  margin: 16px auto 40px;
+}
+
+.volver {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: #145451;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tarjeta {
+  padding: 36px;
+  background: white;
+  border: 1px solid #dce6e5;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgb(20 84 81 / 6%);
+}
+
+.simbolo {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  border-radius: 14px;
+  background: #d5f5eb;
+  color: #145451;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 30px;
+}
+
+header p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.campo {
+  margin-bottom: 22px;
+}
+
+label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid #b5ccca;
+  border-radius: 8px;
+  background: white;
+  color: #163b3a;
+}
+
+input[aria-invalid="true"] {
+  border-color: #b42318;
+}
+
+.entrada-clave {
+  display: flex;
+  gap: 8px;
+}
+
+.entrada-clave input {
+  flex: 1;
+}
+
+button {
+  cursor: pointer;
+}
+
+.ver-clave {
+  padding: 0 12px;
+  border: 1px solid #b5ccca;
+  border-radius: 8px;
+  background: #f0f8f6;
+  color: #145451;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ingresar {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #145451;
+  color: white;
+  font-weight: 700;
+}
+
+.ingresar:hover {
+  background: #0e403e;
+}
+
+.error {
+  margin: 7px 0 0;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.mensaje {
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff5db;
+  color: #785600;
+  font-size: 14px;
+}
+
+.registro {
+  margin: 26px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid #e4eceb;
+  text-align: center;
+  font-size: 14px;
+}
+
+.registro a {
+  color: #145451;
+  font-weight: 700;
+}
+
+.nota {
+  text-align: center;
+  font-size: 13px;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #16856c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .tarjeta {
+    padding: 24px 18px;
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\login\login.html
+==========================================
+<section class="acceso" aria-labelledby="titulo-login">
+  <a routerLink="/" class="volver">â† Volver al inicio</a>
+
+  <div class="tarjeta">
+    <div class="simbolo" aria-hidden="true">R</div>
+
+    <header>
+      <h1 id="titulo-login">Iniciar sesiÃ³n</h1>
+      <p>Accede a RunaRed y sigue compartiendo conocimiento.</p>
+    </header>
+
+    <form
+      [formGroup]="formulario"
+      (ngSubmit)="ingresar()"
+      (input)="mensaje.set('')"
+      novalidate
+    >
+      <div class="campo">
+        <label for="correo">Correo electrÃ³nico</label>
+
+        <input
+          id="correo"
+          type="email"
+          formControlName="correo"
+          autocomplete="username"
+          placeholder="nombre@ejemplo.com"
+          required
+          [attr.aria-invalid]="correo.touched && correo.invalid"
+          [attr.aria-describedby]="
+            correo.touched && correo.invalid ? 'error-correo' : null
+          "
+        />
+
+        @if (correo.touched && correo.invalid) {
+          <p id="error-correo" class="error">
+            @if (correo.hasError('required')) {
+              Ingresa tu correo electrÃ³nico.
+            } @else {
+              Ingresa un correo vÃ¡lido.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="clave">ContraseÃ±a</label>
+
+        <div class="entrada-clave">
+          <input
+            id="clave"
+            [type]="mostrarClave() ? 'text' : 'password'"
+            formControlName="clave"
+            autocomplete="current-password"
+            placeholder="Ingresa tu contraseÃ±a"
+            required
+            [attr.aria-invalid]="clave.touched && clave.invalid"
+            [attr.aria-describedby]="
+              clave.touched && clave.invalid ? 'error-clave' : null
+            "
+          />
+
+          <button
+            type="button"
+            class="ver-clave"
+            aria-controls="clave"
+            [attr.aria-label]="
+              mostrarClave() ? 'Ocultar contraseÃ±a' : 'Mostrar contraseÃ±a'
+            "
+            (click)="mostrarClave.set(!mostrarClave())"
+          >
+            {{ mostrarClave() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+
+        @if (clave.touched && clave.invalid) {
+          <p id="error-clave" class="error">
+            Ingresa tu contraseÃ±a.
+          </p>
+        }
+      </div>
+
+      <button type="submit" class="ingresar">
+        Iniciar sesiÃ³n
+      </button>
+
+      @if (mensaje()) {
+        <p class="mensaje" role="status">{{ mensaje() }}</p>
+      }
+    </form>
+
+    <p class="registro">
+      Â¿TodavÃ­a no tienes cuenta?
+      <a routerLink="/registro">RegÃ­strate aquÃ­</a>
+    </p>
+  </div>
+
+  <p class="nota">Aprender y ayudar nos acerca.</p>
+</section>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\login\login.spec.ts
+==========================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Login } from './login';
+
+describe('Login', () => {
+  let component: Login;
+  let fixture: ComponentFixture<Login>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Login],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Login);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\login\login.ts
+==========================================
+import { Component, inject, signal } from '@angular/core';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './login.html',
+  styleUrl: './login.css'
+})
+export class Login {
+  private fb = inject(FormBuilder);
+
+  mostrarClave = signal(false);
+  mensaje = signal('');
+
+  formulario = this.fb.nonNullable.group({
+    correo: ['', [Validators.required, Validators.email]],
+    clave: ['', Validators.required]
+  });
+
+  get correo() {
+    return this.formulario.controls.correo;
+  }
+
+  get clave() {
+    return this.formulario.controls.clave;
+  }
+
+  ingresar(): void {
+    this.mensaje.set('');
+    this.formulario.markAllAsTouched();
+
+    if (this.formulario.invalid) {
+      return;
+    }
+
+    // AquÃ­ conectaremos el servicio de autenticaciÃ³n del backend.
+    this.mensaje.set(
+      'El inicio de sesiÃ³n todavÃ­a no estÃ¡ disponible. Prueba mÃ¡s adelante.'
+    );
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\recursos\recursos.css
+==========================================
+:host {
+  display: block;
+}
+
+.encabezado h1 {
+  margin: 14px 0;
+  font-size: clamp(28px, 4vw, 38px);
+}
+
+.etiqueta {
+  color: #17645a;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.aviso {
+  padding: 12px 16px;
+  background: #edf5f3;
+  border-left: 4px solid #17645a;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filtros {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid #dce5e3;
+  border-radius: 12px;
+  background: white;
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input[type="search"] {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid #a9bfba;
+  border-radius: 8px;
+  background: white;
+  color: #163b3a;
+}
+
+.tipos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 16px;
+  border: 1px solid #b6cbc5;
+  border-radius: 8px;
+  background: white;
+  color: #145451;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #edf5f3;
+}
+
+button.seleccionado {
+  background: #145451;
+  border-color: #145451;
+  color: white;
+}
+
+.opciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+}
+
+.casilla input {
+  width: 18px;
+  height: 18px;
+  accent-color: #145451;
+}
+
+.contador {
+  margin: 26px 0 16px;
+  font-weight: bold;
+}
+
+.cuadricula {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+}
+
+.tarjeta {
+  padding: 24px;
+  background: white;
+  border: 1px solid #dce5e3;
+  border-radius: 12px;
+}
+
+.etiquetas {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tipo,
+.estado {
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.tipo {
+  background: #eaf0ff;
+  color: #294c7a;
+}
+
+.estado {
+  background: #d5f5e9;
+  color: #14543c;
+}
+
+.no-disponible {
+  background: #fff0d2;
+  color: #80520b;
+}
+
+.tarjeta h2 {
+  margin: 20px 0 8px;
+  font-size: 20px;
+}
+
+.categoria {
+  color: #17645a;
+  font-size: 13px;
+}
+
+.tarjeta p {
+  font-size: 14px;
+}
+
+details {
+  margin-top: 20px;
+  border-top: 1px solid #e2eae7;
+  padding-top: 16px;
+}
+
+summary {
+  color: #145451;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.detalle {
+  padding-top: 8px;
+}
+
+.sin-resultados {
+  grid-column: 1 / -1;
+  padding: 40px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+}
+
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #16856c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1000px) {
+  .cuadricula {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .cuadricula {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros {
+    padding: 18px;
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\recursos\recursos.html
+==========================================
+<section aria-labelledby="titulo-catalogo">
+  <header class="encabezado">
+    <span class="etiqueta">APRENDEMOS COMPARTIENDO</span>
+    <h1 id="titulo-catalogo">CatÃ¡logo de recursos educativos</h1>
+    <p>Explora libros y apuntes compartidos por estudiantes de Huancayo.</p>
+  </header>
+
+  <div class="filtros">
+    <label for="busqueda">Buscar recursos</label>
+
+    <input
+      #campoBusqueda
+      id="busqueda"
+      type="search"
+      placeholder="Busca por tÃ­tulo, categorÃ­a, universidad o descripciÃ³n..."
+      [value]="busqueda()"
+      (input)="busqueda.set(campoBusqueda.value)"
+    />
+
+    <div class="tipos" role="group" aria-label="Universidad">
+      @for (opcion of universidades; track opcion) {
+        <button
+          type="button"
+          [class.seleccionado]="universidadFiltro() === opcion"
+          [attr.aria-pressed]="universidadFiltro() === opcion"
+          (click)="universidadFiltro.set(opcion)">
+          {{ opcion }}
+        </button>
+      }
+    </div>
+
+    <div class="opciones">
+      <button
+        type="button"
+        class="limpiar"
+        (click)="limpiarFiltros()">
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <p class="contador">Cargando recursos desde RunaRed API...</p>
+  } @else if (errorMsg()) {
+    <p class="aviso" style="border-left-color: #b42318; color: #b42318;">{{ errorMsg() }}</p>
+  } @else {
+    <p class="contador" role="status">
+      {{ recursosFiltrados().length }} recursos encontrados
+    </p>
+
+    <div class="cuadricula">
+      @for (recurso of recursosFiltrados(); track recurso.id) {
+        <article class="tarjeta">
+          <div class="etiquetas">
+            <span class="tipo">{{ recurso.university }}</span>
+            <span class="estado">{{ recurso.category }}</span>
+          </div>
+
+          <h2>{{ recurso.title }}</h2>
+          <p>{{ recurso.description }}</p>
+
+          <details>
+            <summary>Ver detalle</summary>
+            <div class="detalle">
+              <p><strong>Universidad:</strong> {{ recurso.university }}</p>
+              <p><strong>CategorÃ­a:</strong> {{ recurso.category }}</p>
+              @if (recurso.file_url) {
+                <p><a [href]="recurso.file_url" target="_blank" rel="noopener noreferrer" class="categoria">Ver recurso / archivo â†—</a></p>
+              }
+            </div>
+          </details>
+        </article>
+      } @empty {
+        <div class="sin-resultados">
+          <h2>No encontramos recursos</h2>
+          <p>Prueba otra bÃºsqueda o aÃ±ade registros desde el backend.</p>
+          <button type="button" (click)="limpiarFiltros()">
+            Mostrar todos
+          </button>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\recursos\recursos.spec.ts
+==========================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Recursos } from './recursos';
+
+describe('Recursos', () => {
+  let component: Recursos;
+  let fixture: ComponentFixture<Recursos>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Recursos],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Recursos);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\recursos\recursos.ts
+==========================================
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ResourceService, ResourceResponse } from '../../services/resource.service';
+
+@Component({
+  selector: 'app-recursos',
+  standalone: true,
+  imports: [],
+  templateUrl: './recursos.html',
+  styleUrl: './recursos.css'
+})
+export class Recursos implements OnInit {
+  private resourceService = inject(ResourceService);
+
+  busqueda = signal<string>('');
+  universidadFiltro = signal<string>('Todas');
+  recursos = signal<ResourceResponse[]>([]);
+  cargando = signal<boolean>(true);
+  errorMsg = signal<string>('');
+
+  universidades: string[] = ['Todas', 'UNCP', 'UPLA', 'UC', 'Roosevelt'];
+
+  ngOnInit(): void {
+    this.cargarRecursos();
+  }
+
+  cargarRecursos(): void {
+    this.cargando.set(true);
+    this.errorMsg.set('');
+
+    this.resourceService.getResources().subscribe({
+      next: (data: ResourceResponse[]) => {
+        this.recursos.set(data);
+        this.cargando.set(false);
+      },
+      error: (err: unknown) => {
+        console.error('Error al conectar con la API:', err);
+        this.errorMsg.set('No se pudo conectar con el servidor de RunaRed.');
+        this.cargando.set(false);
+      }
+    });
+  }
+
+  recursosFiltrados = computed(() => {
+    const texto = this.normalizar(this.busqueda().trim());
+    const univ = this.universidadFiltro();
+
+    return this.recursos().filter((recurso) => {
+      const contenido = this.normalizar(
+        `${recurso.title} ${recurso.category} ${recurso.description} ${recurso.university}`
+      );
+
+      const coincideTexto = contenido.includes(texto);
+      const coincideUniversidad = univ === 'Todas' || recurso.university === univ;
+
+      return coincideTexto && coincideUniversidad;
+    });
+  });
+
+  limpiarFiltros(): void {
+    this.busqueda.set('');
+    this.universidadFiltro.set('Todas');
+  }
+
+  private normalizar(texto: string): string {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\registro\registro.css
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\registro\registro.html
+==========================================
+<p>registro works!</p>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\registro\registro.spec.ts
+==========================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Registro } from './registro';
+
+describe('Registro', () => {
+  let component: Registro;
+  let fixture: ComponentFixture<Registro>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Registro],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Registro);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\pages\registro\registro.ts
+==========================================
+import { Component } from '@angular/core';
+
+@Component({
+  imports: [],
+  selector: 'app-registro',
+  styleUrl: './registro.css',
+  templateUrl: './registro.html',
+})
+export class Registro {}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\services\resource.service.ts
+==========================================
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface ResourceResponse {
+  id: number;
+  title: string;
+  description: string;
+  university: string;
+  category: string;
+  file_url?: string;
+  created_at: string;
+}
+
+export interface ResourceCreate {
+  title: string;
+  description: string;
+  university: string;
+  category: string;
+  file_url?: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ResourceService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://127.0.0.1:8000/resources';
+
+  getResources(university?: string): Observable<ResourceResponse[]> {
+    const url = university ? `${this.apiUrl}/?university=${university}` : `${this.apiUrl}/`;
+    return this.http.get<ResourceResponse[]>(url);
+  }
+
+  createResource(resource: ResourceCreate): Observable<ResourceResponse> {
+    return this.http.post<ResourceResponse>(`${this.apiUrl}/`, resource);
+  }
+
+  getResourceById(id: number): Observable<ResourceResponse> {
+    return this.http.get<ResourceResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  deleteResource(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\cabecera\cabecera.css
+==========================================
+.cabecera {
+  background: #145451;
+  color: white;
+}
+
+.barra {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.marca {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.marca strong {
+  font-size: 20px;
+}
+
+.marca span {
+  font-size: 12px;
+  color: #a9e8d9;
+}
+
+nav,
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+nav a {
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+}
+
+nav a:hover,
+nav a.activo {
+  border-bottom-color: #68f0c0;
+}
+
+.boton-ingresar,
+.boton-registro {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.boton-ingresar {
+  border: 1px solid #b1d5cf;
+}
+
+.boton-registro {
+  background: #68f0c0;
+  color: #103f3c;
+  font-weight: bold;
+}
+
+a:focus-visible {
+  outline: 3px solid #68f0c0;
+  outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+  .barra {
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .marca {
+    width: 100%;
+    text-align: center;
+  }
+
+  .acciones {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\cabecera\cabecera.html
+==========================================
+<header class="cabecera">
+  <div class="barra">
+    <a routerLink="/" class="marca">
+      <strong>RunaRed Â· Huancayo</strong>
+      <span>Comunidad acadÃ©mica</span>
+    </a>
+
+    <nav aria-label="NavegaciÃ³n principal">
+      <a
+        routerLink="/"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page">
+        Inicio
+      </a>
+
+      <a
+        routerLink="/recursos"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page">
+        Recursos
+      </a>
+    </nav>
+
+    <div class="acciones">
+      <a routerLink="/login" class="boton-ingresar">
+        Iniciar sesiÃ³n
+      </a>
+
+      <a routerLink="/registro" class="boton-registro">
+        Registrarme
+      </a>
+    </div>
+  </div>
+</header>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\cabecera\cabecera.spec.ts
+==========================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Cabecera } from './cabecera';
+
+describe('Cabecera', () => {
+  let component: Cabecera;
+  let fixture: ComponentFixture<Cabecera>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Cabecera],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Cabecera);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\cabecera\cabecera.ts
+==========================================
+<header class="cabecera">
+  <div class="barra">
+    <a routerLink="/" class="marca">
+      <strong>RunaRed Â· Huancayo</strong>
+      <span>Comunidad acadÃ©mica</span>
+    </a>
+
+    <nav aria-label="NavegaciÃ³n principal">
+      <a
+        routerLink="/"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page">
+        Inicio
+      </a>
+
+      <a
+        routerLink="/recursos"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page">
+        Recursos
+      </a>
+    </nav>
+
+    <div class="acciones">
+      <a routerLink="/login" class="boton-ingresar">
+        Iniciar sesiÃ³n
+      </a>
+
+      <a routerLink="/registro" class="boton-registro">
+        Registrarme
+      </a>
+    </div>
+  </div>
+</header>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\pie\pie.css
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\pie\pie.html
+==========================================
+<p>pie works!</p>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\pie\pie.spec.ts
+==========================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Pie } from './pie';
+
+describe('Pie', () => {
+  let component: Pie;
+  let fixture: ComponentFixture<Pie>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Pie],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Pie);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\shared\pie\pie.ts
+==========================================
+import { Component } from '@angular/core';
+
+@Component({
+  imports: [],
+  selector: 'app-pie',
+  styleUrl: './pie.css',
+  templateUrl: './pie.html',
+})
+export class Pie {}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\app.config.ts
+==========================================
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http'; // <--- Importado
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes),
+    provideHttpClient() // <--- Agregado
+  ]
+};
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\app.css
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\app.html
+==========================================
+<app-cabecera />
+
+<main class="contenido">
+  <router-outlet />
+</main>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\app.routes.ts
+==========================================
+import { Routes } from '@angular/router';
+import { Inicio } from './pages/inicio/inicio';
+import { Login } from './pages/login/login';
+import { Registro } from './pages/registro/registro';
+import { Recursos } from './pages/recursos/recursos';
+
+export const routes: Routes = [
+  { path: '', component: Inicio, title: 'RunaRed | Inicio' },
+  { path: 'login', component: Login, title: 'RunaRed | Iniciar sesiÃ³n' },
+  { path: 'registro', component: Registro, title: 'RunaRed | Registro' },
+  { path: 'recursos', component: Recursos, title: 'RunaRed | Recursos' },
+  { path: '**', redirectTo: '' }
+];
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\app.spec.ts
+==========================================
+import { TestBed } from '@angular/core/testing';
+import { App } from './app';
+
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+    })
+      .compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it('should render title', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontend');
+  });
+});
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\app\app.ts
+==========================================
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Cabecera } from './shared/cabecera/cabecera';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, Cabecera],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\index.html
+==========================================
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Frontend</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\main.ts
+==========================================
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig)
+  .catch((err) => console.error(err));
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\frontend\src\styles.css
+==========================================
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f7f9fc;
+  color: #163b3a;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.contenido {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+h1 {
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.15;
+}
+
+p {
+  line-height: 1.7;
+  color: #526463;
+}
+
+
+

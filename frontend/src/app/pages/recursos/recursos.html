@@ -1,0 +1,102 @@
+<section aria-labelledby="titulo-catalogo">
+  <header class="encabezado">
+    <span class="etiqueta">APRENDEMOS COMPARTIENDO</span>
+    <h1 id="titulo-catalogo">Catálogo de recursos educativos</h1>
+    <p>Explora libros y apuntes compartidos por estudiantes.</p>
+  </header>
+
+  <p class="aviso">
+    Vista de demostración: los recursos y propietarios son ejemplos.
+  </p>
+
+  <div class="filtros">
+    <label for="busqueda">Buscar recursos</label>
+
+    <input
+      #campoBusqueda
+      id="busqueda"
+      type="search"
+      placeholder="Busca por título, categoría o descripción..."
+      [value]="busqueda()"
+      (input)="busqueda.set(campoBusqueda.value)"
+    />
+
+    <div class="tipos" role="group" aria-label="Tipo de recurso">
+      @for (opcion of tipos; track opcion) {
+        <button
+          type="button"
+          [class.seleccionado]="tipo() === opcion"
+          [attr.aria-pressed]="tipo() === opcion"
+          (click)="tipo.set(opcion)">
+          {{ opcion }}
+        </button>
+      }
+    </div>
+
+    <div class="opciones">
+      <label class="casilla">
+        <input
+          #campoDisponibles
+          type="checkbox"
+          [checked]="soloDisponibles()"
+          (change)="soloDisponibles.set(campoDisponibles.checked)"
+        />
+        Solo disponibles
+      </label>
+
+      <button
+        type="button"
+        class="limpiar"
+        (click)="limpiarFiltros()">
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <p class="contador" role="status">
+    {{ recursosFiltrados().length }} recursos encontrados
+  </p>
+
+  <div class="cuadricula">
+    @for (recurso of recursosFiltrados(); track recurso.id) {
+      <article class="tarjeta">
+        <div class="etiquetas">
+          <span class="tipo">{{ recurso.tipo }}</span>
+
+          <span
+            class="estado"
+            [class.no-disponible]="!recurso.disponible">
+            {{ recurso.disponible ? 'Disponible' : 'En préstamo' }}
+          </span>
+        </div>
+
+        <h2>{{ recurso.titulo }}</h2>
+        <span class="categoria">{{ recurso.categoria }}</span>
+        <p>{{ recurso.descripcion }}</p>
+
+        <details>
+          <summary>Ver detalle</summary>
+
+          <div class="detalle">
+            <p><strong>Propietario:</strong> {{ recurso.propietario }}</p>
+            <p><strong>Tipo:</strong> {{ recurso.tipo }}</p>
+
+            @if (recurso.tipo === 'Libro físico') {
+              <p>La entrega y devolución se coordinan con el propietario.</p>
+            } @else {
+              <p>Material digital. Esta demostración no incluye un archivo.</p>
+            }
+          </div>
+        </details>
+      </article>
+    } @empty {
+      <div class="sin-resultados">
+        <h2>No encontramos recursos</h2>
+        <p>Prueba otra palabra o limpia los filtros.</p>
+        <button type="button" (click)="limpiarFiltros()">
+          Mostrar todos
+        </button>
+      </div>
+    }
+  </div>
+</section>

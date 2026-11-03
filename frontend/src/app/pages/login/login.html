@@ -1,0 +1,98 @@
+<section class="acceso" aria-labelledby="titulo-login">
+  <a routerLink="/" class="volver">← Volver al inicio</a>
+
+  <div class="tarjeta">
+    <div class="simbolo" aria-hidden="true">R</div>
+
+    <header>
+      <h1 id="titulo-login">Iniciar sesión</h1>
+      <p>Accede a RunaRed y sigue compartiendo conocimiento.</p>
+    </header>
+
+    <form
+      [formGroup]="formulario"
+      (ngSubmit)="ingresar()"
+      (input)="mensaje.set('')"
+      novalidate
+    >
+      <div class="campo">
+        <label for="correo">Correo electrónico</label>
+
+        <input
+          id="correo"
+          type="email"
+          formControlName="correo"
+          autocomplete="username"
+          placeholder="nombre@ejemplo.com"
+          required
+          [attr.aria-invalid]="correo.touched && correo.invalid"
+          [attr.aria-describedby]="
+            correo.touched && correo.invalid ? 'error-correo' : null
+          "
+        />
+
+        @if (correo.touched && correo.invalid) {
+          <p id="error-correo" class="error">
+            @if (correo.hasError('required')) {
+              Ingresa tu correo electrónico.
+            } @else {
+              Ingresa un correo válido.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+
+        <div class="entrada-clave">
+          <input
+            id="clave"
+            [type]="mostrarClave() ? 'text' : 'password'"
+            formControlName="clave"
+            autocomplete="current-password"
+            placeholder="Ingresa tu contraseña"
+            required
+            [attr.aria-invalid]="clave.touched && clave.invalid"
+            [attr.aria-describedby]="
+              clave.touched && clave.invalid ? 'error-clave' : null
+            "
+          />
+
+          <button
+            type="button"
+            class="ver-clave"
+            aria-controls="clave"
+            [attr.aria-label]="
+              mostrarClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'
+            "
+            (click)="mostrarClave.set(!mostrarClave())"
+          >
+            {{ mostrarClave() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+
+        @if (clave.touched && clave.invalid) {
+          <p id="error-clave" class="error">
+            Ingresa tu contraseña.
+          </p>
+        }
+      </div>
+
+      <button type="submit" class="ingresar">
+        Iniciar sesión
+      </button>
+
+      @if (mensaje()) {
+        <p class="mensaje" role="status">{{ mensaje() }}</p>
+      }
+    </form>
+
+    <p class="registro">
+      ¿Todavía no tienes cuenta?
+      <a routerLink="/registro">Regístrate aquí</a>
+    </p>
+  </div>
+
+  <p class="nota">Aprender y ayudar nos acerca.</p>
+</section>

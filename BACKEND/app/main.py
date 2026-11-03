@@ -1,37 +1,28 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
-import app.models.user 
-import app.models.resource  # Carga modelo de recursos
-from app.routes import auth, resources
+from app.database import Base, engine
+from app.routes import resources  # <--- Importante
 
-# Crear tablas en SQLite
+# Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="RunaRed API",
-    description="API para la plataforma de intercambio de recursos educativos y tutorías en Huancayo",
+    description="API de intercambio de recursos educativos para Huancayo",
     version="1.0.0"
 )
 
-origins = ["http://localhost:4200"]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Registrar Routers
-app.include_router(auth.router)
-app.include_router(resources.router)
+# Registrar las rutas del CRUD
+app.include_router(resources.router)  # <--- Importante
 
 @app.get("/")
 def root():
-    return {
-        "status": "online",
-        "proyecto": "RunaRed API",
-        "mensaje": "Servidor Backend corriendo correctamente"
-    }
+    return {"status": "ok", "message": "Backend de RunaRed con uv activo"}

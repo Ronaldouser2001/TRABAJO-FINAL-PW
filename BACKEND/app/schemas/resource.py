@@ -1,38 +1,27 @@
 from pydantic import BaseModel
-from datetime import datetime
 from typing import Optional
-from app.schemas.user import UserResponse
+from datetime import datetime
 
-# Esquema para crear un recurso
-class ResourceCreate(BaseModel):
-    titulo: str
-    descripcion: str
-    categoria: str
-    materia: str
-    formato: Optional[str] = "digital"
-    url_recurso: Optional[str] = None
+class ResourceBase(BaseModel):
+    title: str
+    description: str
+    university: str  # Ej: UNCP, UPLA, UC, Roosevelt
+    category: str    # Ej: Libro, Apunte, Examen, Parcial
+    file_url: Optional[str] = None
 
-# Esquema para actualizar un recurso
+class ResourceCreate(ResourceBase):
+    pass
+
 class ResourceUpdate(BaseModel):
-    titulo: Optional[str] = None
-    descripcion: Optional[str] = None
-    categoria: Optional[str] = None
-    materia: Optional[str] = None
-    formato: Optional[str] = None
-    url_recurso: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    university: Optional[str] = None
+    category: Optional[str] = None
+    file_url: Optional[str] = None
 
-# Respuesta pública del recurso
-class ResourceResponse(BaseModel):
+class ResourceResponse(ResourceBase):
     id: int
-    titulo: str
-    descripcion: str
-    categoria: str
-    materia: str
-    formato: str
-    url_recurso: Optional[str]
-    usuario_id: int
-    creado_en: datetime
-    propietario: UserResponse
+    created_at: datetime
 
     class Config:
         from_attributes = True

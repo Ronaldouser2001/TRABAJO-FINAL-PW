@@ -1,0 +1,35 @@
+<header class="cabecera">
+  <div class="barra">
+    <a routerLink="/" class="marca">
+      <strong>RunaRed · Huancayo</strong>
+      <span>Comunidad académica</span>
+    </a>
+
+    <nav aria-label="Navegación principal">
+      <a
+        routerLink="/"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page">
+        Inicio
+      </a>
+
+      <a
+        routerLink="/recursos"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page">
+        Recursos
+      </a>
+    </nav>
+
+    <div class="acciones">
+      <a routerLink="/login" class="boton-ingresar">
+        Iniciar sesión
+      </a>
+
+      <a routerLink="/registro" class="boton-registro">
+        Registrarme
+      </a>
+    </div>
+  </div>
+</header>

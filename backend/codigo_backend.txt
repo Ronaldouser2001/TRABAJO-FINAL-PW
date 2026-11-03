@@ -1,0 +1,232 @@
+﻿==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\database.py
+==========================================
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+DATABASE_URL = "sqlite:///./runared.db"
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\main.py
+==========================================
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.database import Base, engine
+
+# Crear tablas
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="RunaRed API",
+    description="API de intercambio de recursos educativos para Huancayo",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Backend de RunaRed con uv activo"}
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\__init__.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\models\resource.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\models\user.py
+==========================================
+from sqlalchemy import Column, Integer, String, DateTime
+from datetime import datetime
+from app.database import Base
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    role = Column(String, default="estudiante") # estudiante, donante, tutor
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\models\__init__.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\routes\auth.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\routes\resources.py
+==========================================
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from typing import List
+from app.database import get_db
+from app.models.resource import Resource
+from app.schemas.resource import ResourceCreate, ResourceUpdate, ResourceResponse
+
+router = APIRouter(prefix="/resources", tags=["Recursos Educativos"])
+
+# 1. CREATE: Crear un nuevo recurso
+@router.post("/", response_model=ResourceResponse, status_code=status.HTTP_201_CREATED)
+def create_resource(resource: ResourceCreate, db: Session = Depends(get_db)):
+    new_resource = Resource(**resource.model_dump())
+    db.add(new_resource)
+    db.commit()
+    db.refresh(new_resource)
+    return new_resource
+
+# 2. READ ALL: Obtener todos los recursos (con filtro opcional por universidad)
+@router.get("/", response_model=List[ResourceResponse])
+def get_resources(university: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(Resource)
+    if university:
+        query = query.filter(Resource.university == university)
+    return query.all()
+
+# 3. READ ONE: Obtener un solo recurso por ID
+@router.get("/{resource_id}", response_model=ResourceResponse)
+def get_resource(resource_id: int, db: Session = Depends(get_db)):
+    resource = db.query(Resource).filter(Resource.id == resource_id).first()
+    if not resource:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Recurso con ID {resource_id} no encontrado"
+        )
+    return resource
+
+# 4. UPDATE: Actualizar un recurso por ID
+@router.put("/{resource_id}", response_model=ResourceResponse)
+def update_resource(resource_id: int, updated_data: ResourceUpdate, db: Session = Depends(get_db)):
+    query = db.query(Resource).filter(Resource.id == resource_id)
+    resource = query.first()
+    
+    if not resource:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Recurso con ID {resource_id} no encontrado"
+        )
+    
+    # Filtrar solo los campos que enviaron para actualizar
+    update_dict = updated_data.model_dump(exclude_unset=True)
+    query.update(update_dict, synchronize_session=False)
+    db.commit()
+    db.refresh(resource)
+    return resource
+
+# 5. DELETE: Eliminar un recurso por ID
+@router.delete("/{resource_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_resource(resource_id: int, db: Session = Depends(get_db)):
+    resource = db.query(Resource).filter(Resource.id == resource_id).first()
+    if not resource:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Recurso con ID {resource_id} no encontrado"
+        )
+    
+    db.delete(resource)
+    db.commit()
+    return None
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\routes\__init__.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\schemas\resource.py
+==========================================
+from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
+class ResourceBase(BaseModel):
+    title: str
+    description: str
+    university: str  # Ej: UNCP, UPLA, UC, Roosevelt
+    category: str    # Ej: Libro, Apunte, Examen, Parcial
+    file_url: Optional[str] = None
+
+class ResourceCreate(ResourceBase):
+    pass
+
+class ResourceUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    university: Optional[str] = None
+    category: Optional[str] = None
+    file_url: Optional[str] = None
+
+class ResourceResponse(ResourceBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\schemas\user.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\schemas\__init__.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\security\jwt.py
+==========================================
+
+
+
+==========================================
+ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\security\__init__.py
+==========================================
+
+
+

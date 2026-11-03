@@ -1,58 +1,68 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional  # <--- Agregado Optional aquí
 from app.database import get_db
 from app.models.resource import Resource
 from app.schemas.resource import ResourceCreate, ResourceUpdate, ResourceResponse
 
 router = APIRouter(prefix="/resources", tags=["Recursos Educativos"])
 
-# 1. CREAR un recurso (Create)
+# 1. CREATE: Crear un nuevo recurso
 @router.post("/", response_model=ResourceResponse, status_code=status.HTTP_201_CREATED)
-def crear_recurso(recurso: ResourceCreate, usuario_id: int, db: Session = Depends(get_db)):
-    nuevo_recurso = Resource(**recurso.dict(), usuario_id=usuario_id)
-    db.add(nuevo_recurso)
+def create_resource(resource: ResourceCreate, db: Session = Depends(get_db)):
+    new_resource = Resource(**resource.model_dump())
+    db.add(new_resource)
     db.commit()
-    db.refresh(nuevo_recurso)
-    return nuevo_recurso
+    db.refresh(new_resource)
+    return new_resource
 
-# 2. OBTENER todos los recursos (Read List)
+# 2. READ ALL: Obtener todos los recursos
 @router.get("/", response_model=List[ResourceResponse])
-def listar_recursos(db: Session = Depends(get_db)):
-    return db.query(Resource).all()
+def get_resources(university: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(Resource)
+    if university:
+        query = query.filter(Resource.university == university)
+    return query.all()
 
-# 3. OBTENER un recurso por ID (Read One)
-@router.get("/{recurso_id}", response_model=ResourceResponse)
-def obtener_recurso(recurso_id: int, db: Session = Depends(get_db)):
-    recurso = db.query(Resource).filter(Resource.id == recurso_id).first()
-    if not recurso:
-        raise HTTPException(status_code=404, detail="Recurso educativo no encontrado")
-    return recurso
+# 3. READ ONE: Obtener un solo recurso por ID
+@router.get("/{resource_id}", response_model=ResourceResponse)
+def get_resource(resource_id: int, db: Session = Depends(get_db)):
+    resource = db.query(Resource).filter(Resource.id == resource_id).first()
+    if not resource:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Recurso con ID {resource_id} no encontrado"
+        )
+    return resource
 
-# 4. ACTUALIZAR un recurso (Update)
-@router.put("/{recurso_id}", response_model=ResourceResponse)
-def actualizar_recurso(recurso_id: int, datos: ResourceUpdate, db: Session = Depends(get_db)):
-    recurso_query = db.query(Resource).filter(Resource.id == recurso_id)
-    recurso = recurso_query.first()
+# 4. UPDATE: Actualizar un recurso por ID
+@router.put("/{resource_id}", response_model=ResourceResponse)
+def update_resource(resource_id: int, updated_data: ResourceUpdate, db: Session = Depends(get_db)):
+    query = db.query(Resource).filter(Resource.id == resource_id)
+    resource = query.first()
     
-    if not recurso:
-        raise HTTPException(status_code=404, detail="Recurso educativo no encontrado")
+    if not resource:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Recurso con ID {resource_id} no encontrado"
+        )
     
-    # Actualizar solo los campos enviados
-    datos_actualizar = datos.dict(exclude_unset=True)
-    recurso_query.update(datos_actualizar, synchronize_session=False)
+    update_dict = updated_data.model_dump(exclude_unset=True)
+    query.update(update_dict, synchronize_session=False)
     db.commit()
-    return recurso_query.first()
+    db.refresh(resource)
+    return resource
 
-# 5. ELIMINAR un recurso (Delete)
-@router.delete("/{recurso_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_recurso(recurso_id: int, db: Session = Depends(get_db)):
-    recurso_query = db.query(Resource).filter(Resource.id == recurso_id)
-    recurso = recurso_query.first()
+# 5. DELETE: Eliminar un recurso por ID
+@router.delete("/{resource_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_resource(resource_id: int, db: Session = Depends(get_db)):
+    resource = db.query(Resource).filter(Resource.id == resource_id).first()
+    if not resource:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Recurso con ID {resource_id} no encontrado"
+        )
     
-    if not recurso:
-        raise HTTPException(status_code=404, detail="Recurso educativo no encontrado")
-    
-    recurso_query.delete(synchronize_session=False)
+    db.delete(resource)
     db.commit()
     return None

@@ -1,0 +1,104 @@
+<section class="rr-form">
+  <a class="rr-link" routerLink="/recursos">← Volver al catálogo</a>
+  <div class="rr-card" style="margin-top: 24px">
+    <span class="rr-kicker">Compartir es sencillo</span>
+    <h1>{{id?'Editar recurso':'Publicar recurso'}}</h1>
+    <p>Los campos con * son obligatorios.</p>
+    @if(cargando()){
+    <div class="rr-loading" role="status">Cargando datos del recurso…</div>
+    } @else if(errorCarga()){
+    <p role="alert" class="rr-error">{{errorCarga()}}</p>
+    <button class="rr-btn" (click)="cargar()">Volver a intentar</button>} @else{
+    <form
+      [formGroup]="form"
+      (ngSubmit)="guardar()"
+      novalidate
+      [attr.aria-busy]="guardando()"
+    >
+      <fieldset [disabled]="guardando()" class="rr-fieldset">
+        <label for="resource-title">Título *</label
+        ><input
+          id="resource-title"
+          class="rr-input"
+          formControlName="title"
+          maxlength="100"
+          required
+          [attr.aria-invalid]="invalido('title')"
+          aria-describedby="title-error"
+        />@if(invalido('title')){
+        <p class="rr-error" id="title-error">
+          Escribe entre 4 y 100 caracteres, sin contar los espacios de los
+          extremos.
+        </p>
+        } <label for="resource-university">Universidad *</label
+        ><input
+          id="resource-university"
+          class="rr-input"
+          formControlName="university"
+          maxlength="120"
+          list="universidades"
+          placeholder="Por ejemplo: UNCP"
+          required
+          [attr.aria-invalid]="invalido('university')"
+          aria-describedby="university-error"
+        /><datalist id="universidades">
+          <option value="UNCP"></option>
+          <option value="UPLA"></option>
+          <option value="UC"></option>
+          <option value="Roosevelt"></option></datalist
+        >@if(invalido('university')){
+        <p class="rr-error" id="university-error">
+          Indica la universidad (entre 2 y 120 caracteres).
+        </p>
+        } <label for="resource-category">Categoría *</label
+        ><select
+          id="resource-category"
+          class="rr-input"
+          formControlName="category"
+          required
+        >
+          @for(c of categorias;track c){
+          <option [value]="c">{{c}}</option>
+          }
+        </select>
+        <label for="resource-description">Descripción *</label
+        ><textarea
+          id="resource-description"
+          class="rr-input"
+          formControlName="description"
+          maxlength="1500"
+          required
+          [attr.aria-invalid]="invalido('description')"
+          aria-describedby="description-error"
+        ></textarea>
+        <p id="description-error" [class.rr-error]="invalido('description')">
+          Describe el material en 20 a 1500 caracteres.
+        </p>
+        <label for="resource-url">Enlace al material (opcional)</label
+        ><input
+          id="resource-url"
+          class="rr-input"
+          type="url"
+          formControlName="file_url"
+          placeholder="https://..."
+          maxlength="2048"
+          [attr.aria-invalid]="invalido('file_url')"
+          aria-describedby="url-error"
+        />
+        <p id="url-error" [class.rr-error]="invalido('file_url')">
+          Usa una dirección completa http:// o https://, sin contraseñas.
+          Comparte materiales propios o con permiso.
+        </p>
+        <div class="rr-actions">
+          <button class="rr-btn" type="submit">
+            {{guardando()?'Guardando…':'Guardar recurso'}}</button
+          ><a class="rr-btn secondary" routerLink="/recursos">Cancelar</a>
+        </div>
+      </fieldset>
+      @if(errorEnvio()){
+      <p role="alert" class="rr-error">{{errorEnvio()}}</p>
+      }
+    </form>
+    }
+  </div>
+</section>

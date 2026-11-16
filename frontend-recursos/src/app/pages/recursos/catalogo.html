@@ -1,0 +1,110 @@
+<section class="rr-page" aria-labelledby="titulo-catalogo">
+  <header class="rr-top">
+    <div>
+      <span class="rr-kicker">Aprendemos compartiendo</span>
+      <h1 id="titulo-catalogo">Recursos educativos</h1>
+      <p>Encuentra materiales compartidos para seguir aprendiendo.</p>
+    </div>
+    <a class="rr-btn" routerLink="/gestion-recursos/nuevo">Publicar recurso</a>
+  </header>
+  @if(eliminado){
+  <p class="rr-notice" role="status">El recurso se eliminó correctamente.</p>
+  }
+  <div class="rr-card">
+    <label for="buscar-api">Buscar por título, descripción o universidad</label
+    ><input
+      id="buscar-api"
+      class="rr-input"
+      type="search"
+      #buscador
+      [value]="busqueda()"
+      (input)="buscar(buscador.value)"
+      placeholder="Por ejemplo: cálculo, programación..."
+    />
+    <form (submit)="$event.preventDefault();cargar()" class="rr-actions">
+      <div class="rr-filter">
+        <label for="universidad-api">Universidad</label
+        ><input
+          id="universidad-api"
+          class="rr-input"
+          [formControl]="universidad"
+          placeholder="Todas · escribe UNCP, UPLA, UC…"
+          maxlength="120"
+        />
+      </div>
+      <button type="submit" class="rr-btn" [disabled]="estado().cargando">
+        Aplicar universidad</button
+      ><button type="button" class="rr-btn secondary" (click)="limpiar()">
+        Limpiar filtros
+      </button>
+    </form>
+    <div class="rr-toolbar" role="group" aria-label="Categoría">
+      @for(c of categorias();track c){<button
+        type="button"
+        class="rr-btn secondary"
+        [class.selected]="categoria()===c"
+        [attr.aria-pressed]="categoria()===c"
+        (click)="tipo(c)"
+      >
+        {{c}}</button
+      >}
+    </div>
+  </div>
+  <div [attr.aria-busy]="estado().cargando">
+    @if(estado().cargando){
+    <div class="rr-loading" role="status">
+      <span class="rr-spinner" aria-hidden="true"></span> Cargando recursos…
+    </div>
+    } @else if(estado().error){
+    <div class="rr-empty">
+      <h2>No pudimos cargar el catálogo</h2>
+      <p role="alert">{{estado().error}}</p>
+      <button class="rr-btn" (click)="cargar()">Volver a intentar</button>
+    </div>
+    } @else{
+    <p role="status">
+      {{filtrados().length}} {{filtrados().length===1?'recurso
+      encontrado':'recursos encontrados'}}
+    </p>
+    <div class="rr-grid">
+      @for(r of visibles();track r.id){
+      <article class="rr-card">
+        <span class="rr-badge">{{r.category}}</span>
+        <h2>{{r.title}}</h2>
+        <p class="rr-kicker">{{r.university}}</p>
+        <p class="rr-excerpt">{{r.description}}</p>
+        <a class="rr-link" [routerLink]="['/recursos',r.id]">Ver detalle →</a>
+      </article>
+      }@empty{
+      <div class="rr-empty">
+        <h2>
+          {{estado().recursos.length?'No encontramos coincidencias':'No hay
+          recursos para mostrar'}}
+        </h2>
+        <p>Prueba otra universidad o limpia los filtros.</p>
+        <button class="rr-btn secondary" (click)="limpiar()">
+          Mostrar todos
+        </button>
+      </div>
+      }
+    </div>
+    @if(totalPaginas()>1){
+    <nav class="rr-actions" aria-label="Páginas de recursos">
+      <button
+        class="rr-btn secondary"
+        [disabled]="pagina()===1"
+        (click)="pagina.set(pagina()-1)"
+      >
+        Anterior</button
+      ><span aria-live="polite">Página {{pagina()}} de {{totalPaginas()}}</span
+      ><button
+        class="rr-btn secondary"
+        [disabled]="pagina()===totalPaginas()"
+        (click)="pagina.set(pagina()+1)"
+      >
+        Siguiente
+      </button>
+    </nav>
+    }}
+  </div>
+</section>

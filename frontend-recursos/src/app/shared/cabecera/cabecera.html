@@ -1,0 +1,27 @@
+<header class="cabecera">
+  <div class="barra">
+    <a routerLink="/" class="marca"
+      ><strong>RunaRed · Huancayo</strong><span>Recursos educativos</span></a
+    >
+    <nav aria-label="Navegación principal">
+      <a
+        routerLink="/"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{exact:true}"
+        ariaCurrentWhenActive="page"
+        >Inicio</a
+      >
+      <a
+        routerLink="/recursos"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page"
+        >Recursos</a
+      >
+    </nav>
+    <div class="acciones">
+      <a routerLink="/gestion-recursos/nuevo" class="boton-publicar"
+        >Publicar recurso</a
+      >
+    </div>
+  </div>
+</header>

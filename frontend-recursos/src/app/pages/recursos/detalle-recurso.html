@@ -1,0 +1,79 @@
+<section class="rr-page">
+  <a class="rr-link" routerLink="/recursos">← Volver al catálogo</a>
+  @if(estado().cargando){
+  <div class="rr-loading" role="status">
+    <span class="rr-spinner" aria-hidden="true"></span>Cargando recurso…
+  </div>
+  } @else if(estado().error){
+  <div class="rr-empty">
+    <h1>No pudimos mostrar este recurso</h1>
+    <p role="alert">{{estado().error}}</p>
+    <button class="rr-btn" (click)="reintentar()">Volver a intentar</button>
+  </div>
+  } @else if(estado().recurso;as r){@if(guardado){
+  <p class="rr-notice" role="status">Recurso guardado correctamente.</p>
+  }
+  <div class="rr-detail" style="margin-top: 24px">
+    <article class="rr-card">
+      <span class="rr-kicker">{{r.university}}</span>
+      <h1>{{r.title}}</h1>
+      <span class="rr-badge">{{r.category}}</span>
+      <h2>Sobre este material</h2>
+      <p class="rr-preline">{{r.description}}</p>
+    </article>
+    <aside class="rr-card">
+      <h2>Material de estudio</h2>
+      @if(urlSegura(r.file_url);as url){
+      <p>El autor compartió un enlace externo para consultar el material.</p>
+      <a class="rr-btn" [href]="url" target="_blank" rel="noopener noreferrer"
+        >Abrir material ↗</a
+      >} @else{
+      <p>
+        Este recurso no incluye un enlace disponible para consultar el archivo.
+      </p>
+      }
+      <hr class="rr-divider" />
+      <h3>Gestión de recursos</h3>
+      <div class="rr-actions">
+        <a
+          class="rr-btn secondary"
+          [routerLink]="['/gestion-recursos/editar',r.id]"
+          >Editar recurso</a
+        ><button
+          class="rr-btn danger"
+          [disabled]="eliminando()"
+          (click)="confirmar.set(true)"
+        >
+          Eliminar recurso
+        </button>
+      </div>
+    </aside>
+  </div>
+  @if(confirmar()){
+  <section
+    class="rr-card rr-confirm"
+    role="alert"
+    aria-label="Confirmar eliminación"
+  >
+    <h2>¿Eliminar «{{r.title}}»?</h2>
+    <p>Se eliminará de la base de datos. Esta acción no se puede deshacer.</p>
+    <div class="rr-actions">
+      <button
+        class="rr-btn danger"
+        [disabled]="eliminando()"
+        (click)="eliminar()"
+      >
+        {{eliminando()?'Eliminando…':'Sí, eliminar'}}</button
+      ><button
+        class="rr-btn secondary"
+        [disabled]="eliminando()"
+        (click)="confirmar.set(false)"
+      >
+        Conservar recurso
+      </button>
+    </div>
+  </section>
+  } @if(mensaje()){
+  <p class="rr-error" role="alert">{{mensaje()}}</p>
+  } }
+</section>

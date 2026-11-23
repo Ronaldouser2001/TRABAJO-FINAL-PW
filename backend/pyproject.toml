@@ -1,25 +1,21 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend FastAPI de RunaRed con SQL Server, pyodbc y argon2-cffi"
 readme = "README.md"
 authors = [
     { name = "Ronaldouser2001", email = "74170150@continental.edu.pe" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
-    "bcrypt>=5.0.0",
-    "fastapi>=0.162.0",
-    "passlib>=1.7.4",
-    "pydantic>=2.14.2",
-    "python-jose>=3.5.0",
-    "sqlalchemy>=2.1.6",
-    "uvicorn[standard]>=0.54.0",
+    "argon2-cffi>=25.1.0",
+    "email-validator>=2.3.0",
+    "fastapi>=0.115.0",
+    "pyjwt>=2.10.0",
+    "pyodbc>=5.2.0",
+    "python-dotenv>=1.1.0",
+    "uvicorn[standard]>=0.34.0",
 ]
 
-[project.scripts]
-backend = "backend:main"
-
-[build-system]
-requires = ["uv_build>=0.13.7,<0.14.0"]
-build-backend = "uv_build"
+[tool.uv]
+package = false

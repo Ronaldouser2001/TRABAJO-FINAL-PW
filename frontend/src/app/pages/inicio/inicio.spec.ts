@@ -1,12 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Inicio } from './inicio';
+import { provideRouter } from "@angular/router";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { Inicio } from "./inicio";
 
-describe('Inicio', () => {
+describe("Inicio", () => {
   let component: Inicio;
   let fixture: ComponentFixture<Inicio>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideRouter([])],
       imports: [Inicio],
     }).compileComponents();
 
@@ -15,7 +17,7 @@ describe('Inicio', () => {
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

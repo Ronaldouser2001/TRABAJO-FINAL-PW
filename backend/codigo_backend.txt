@@ -1,232 +1,966 @@
-﻿==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\database.py
 ==========================================
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+ARCHIVO: backend/app/__init__.py
+==========================================
 
-DATABASE_URL = "sqlite:///./runared.db"
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+==========================================
+ARCHIVO: backend/app/database.py
+==========================================
+"""Conexión a SQL Server mediante pyodbc, sin ORM."""
 
-def get_db():
-    db = SessionLocal()
+import os
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Generator
+
+import pyodbc
+from dotenv import load_dotenv
+
+# Carga el .env del backend sin depender del directorio de ejecución
+ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_FILE)
+
+DEFAULT_DRIVER = "ODBC Driver 18 for SQL Server"
+FALLBACK_DRIVERS = (
+    "ODBC Driver 18 for SQL Server",
+    "ODBC Driver 17 for SQL Server",
+)
+
+
+def resolve_driver(configured: str | None = None) -> str:
+    """Devuelve el driver configurado o un respaldo disponible en el sistema."""
+    requested = (configured or os.getenv("DB_DRIVER", "")).strip()
+    installed = {driver.casefold(): driver for driver in pyodbc.drivers()}
+
+    if requested and requested.casefold() in installed:
+        return installed[requested.casefold()]
+
+    for driver in FALLBACK_DRIVERS:
+        if driver.casefold() in installed:
+            return installed[driver.casefold()]
+
+    return requested or DEFAULT_DRIVER
+
+
+def get_connection_string() -> str:
+    """Construye la cadena ODBC con autenticación de Windows."""
+    driver = resolve_driver()
+    server = os.getenv("DB_SERVER", "DESKTOP-K8VT9OI").strip()
+    database = os.getenv("DB_NAME", "RunaRedBD").strip()
+    trusted = os.getenv("DB_TRUSTED_CONNECTION", "yes").strip()
+    trust_cert = os.getenv("DB_TRUST_SERVER_CERTIFICATE", "yes").strip()
+
+    return (
+        f"DRIVER={{{driver}}};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"Trusted_Connection={trusted};"
+        f"TrustServerCertificate={trust_cert};"
+    )
+
+
+@contextmanager
+def get_db_connection() -> Generator[pyodbc.Connection, None, None]:
+    """Abre una conexión a SQL Server y garantiza su cierre."""
+    connection = pyodbc.connect(get_connection_string())
     try:
-        yield db
+        yield connection
     finally:
-        db.close()
+        connection.close()
 
 
+def test_connection() -> bool:
+    """Comprueba que la base de datos responde a una consulta simple."""
+    try:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT 1")
+            row = cursor.fetchone()
+            return row is not None and int(row[0]) == 1
+    except pyodbc.Error:
+        return False
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\main.py
+ARCHIVO: backend/app/main.py
 ==========================================
-from fastapi import FastAPI
+"""Aplicación FastAPI de RunaRed."""
+
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import Base, engine
+from fastapi.responses import JSONResponse
 
-# Crear tablas
-Base.metadata.create_all(bind=engine)
+from app.routes.auth import router as auth_router
+from app.routes.resources import router as resources_router
+from app.services.exceptions import (
+    CredencialesInvalidasError,
+    ResourceNotFoundError,
+    TokenInvalidoError,
+    UsuarioAlreadyExistsError,
+)
 
 app = FastAPI(
     title="RunaRed API",
-    description="API de intercambio de recursos educativos para Huancayo",
-    version="1.0.0"
+    description=(
+        "API de intercambio de recursos educativos para Huancayo, "
+        "con FastAPI, SQL Server, pyodbc y argon2-cffi."
+    ),
+    version="2.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
+app.include_router(resources_router)
+
+
+@app.exception_handler(UsuarioAlreadyExistsError)
+async def usuario_ya_existe_handler(
+    _request: Request,
+    exc: UsuarioAlreadyExistsError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": str(exc)},
+    )
+
+
+@app.exception_handler(CredencialesInvalidasError)
+async def credenciales_invalidas_handler(
+    _request: Request,
+    exc: CredencialesInvalidasError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        headers={"WWW-Authenticate": "Bearer"},
+        content={"detail": str(exc)},
+    )
+
+
+@app.exception_handler(TokenInvalidoError)
+async def token_invalido_handler(
+    _request: Request,
+    exc: TokenInvalidoError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        headers={"WWW-Authenticate": "Bearer"},
+        content={"detail": str(exc)},
+    )
+
+
+@app.exception_handler(ResourceNotFoundError)
+async def resource_not_found_handler(
+    _request: Request,
+    exc: ResourceNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": str(exc)},
+    )
+
+
 @app.get("/")
-def root():
-    return {"status": "ok", "message": "Backend de RunaRed con uv activo"}
+def root() -> dict[str, str]:
+    return {
+        "status": "ok",
+        "message": "Backend de RunaRed activo",
+    }
 
+==========================================
+ARCHIVO: backend/app/repositories/__init__.py
+==========================================
+"""Repositorios de acceso a datos con pyodbc."""
+
+==========================================
+ARCHIVO: backend/app/repositories/user_repository.py
+==========================================
+"""Repositorio de usuarios sobre SQL Server con pyodbc."""
+
+from typing import Any
+
+from app.database import get_db_connection
+
+
+def _user_from_row(row: Any, include_password: bool = False) -> dict[str, Any]:
+    user = {
+        "id": int(row.id),
+        "full_name": str(row.full_name).strip(),
+        "email": str(row.email).strip(),
+        "role": str(row.role).strip(),
+        "created_at": row.created_at,
+    }
+    if include_password:
+        user["password_hash"] = str(row.password_hash).strip()
+    return user
+
+
+class UserRepository:
+    """Acceso parametrizado a la tabla dbo.users."""
+
+    def get_by_email(self, email: str) -> dict[str, Any] | None:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                SELECT id, full_name, email, password_hash, role, created_at
+                FROM dbo.users
+                WHERE LOWER(email) = LOWER(?)
+                """,
+                (email.strip(),),
+            )
+            row = cursor.fetchone()
+            return _user_from_row(row, include_password=True) if row else None
+
+    def get_by_id(self, user_id: int) -> dict[str, Any] | None:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                SELECT id, full_name, email, password_hash, role, created_at
+                FROM dbo.users
+                WHERE id = ?
+                """,
+                (user_id,),
+            )
+            row = cursor.fetchone()
+            return _user_from_row(row, include_password=True) if row else None
+
+    def exists_email(self, email: str) -> bool:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT 1 FROM dbo.users WHERE LOWER(email) = LOWER(?)",
+                (email.strip(),),
+            )
+            return cursor.fetchone() is not None
+
+    def create(
+        self,
+        full_name: str,
+        email: str,
+        password_hash: str,
+        role: str,
+    ) -> dict[str, Any]:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                INSERT INTO dbo.users (full_name, email, password_hash, role)
+                OUTPUT INSERTED.id, INSERTED.full_name, INSERTED.email,
+                       INSERTED.role, INSERTED.created_at
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    full_name.strip(),
+                    email.strip().lower(),
+                    password_hash,
+                    role.strip() or "estudiante",
+                ),
+            )
+            row = cursor.fetchone()
+            connection.commit()
+            if row is None:
+                raise RuntimeError("SQL Server no devolvió el usuario insertado.")
+            return _user_from_row(row)
+
+
+user_repository = UserRepository()
+
+==========================================
+ARCHIVO: backend/app/repositories/resource_repository.py
+==========================================
+"""Repositorio de recursos educativos sobre SQL Server con pyodbc."""
+
+from typing import Any
+
+from app.database import get_db_connection
+
+UPDATABLE_FIELDS = (
+    "title",
+    "description",
+    "university",
+    "category",
+    "file_url",
+)
+
+
+def _row_to_dict(cursor: Any, row: Any) -> dict[str, Any]:
+    columns = [
+        str(column[0]).lower() for column in (cursor.description or [])
+    ]
+    return dict(zip(columns, row))
+
+
+class ResourceRepository:
+    """Acceso parametrizado a la tabla dbo.resources."""
+
+    def list(self, university: str | None = None) -> list[dict[str, Any]]:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            if university and university.strip():
+                cursor.execute(
+                    """
+                    SELECT id, title, description, university, category,
+                           file_url, created_at
+                    FROM dbo.resources
+                    WHERE university = ?
+                    ORDER BY id ASC
+                    """,
+                    (university.strip(),),
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT id, title, description, university, category,
+                           file_url, created_at
+                    FROM dbo.resources
+                    ORDER BY id ASC
+                    """
+                )
+            return [_row_to_dict(cursor, row) for row in cursor.fetchall()]
+
+    def get(self, resource_id: int) -> dict[str, Any] | None:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                SELECT id, title, description, university, category,
+                       file_url, created_at
+                FROM dbo.resources
+                WHERE id = ?
+                """,
+                (resource_id,),
+            )
+            row = cursor.fetchone()
+            return _row_to_dict(cursor, row) if row else None
+
+    def create(
+        self,
+        title: str,
+        description: str,
+        university: str,
+        category: str,
+        file_url: str | None = None,
+    ) -> dict[str, Any]:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                INSERT INTO dbo.resources
+                    (title, description, university, category, file_url)
+                OUTPUT INSERTED.*
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (title, description, university, category, file_url),
+            )
+            row = cursor.fetchone()
+            connection.commit()
+            if row is None:
+                raise RuntimeError("SQL Server no devolvió el recurso insertado.")
+            return _row_to_dict(cursor, row)
+
+    def update(
+        self,
+        resource_id: int,
+        changes: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        fields = [
+            field for field in UPDATABLE_FIELDS if field in changes
+        ]
+        if not fields:
+            return self.get(resource_id)
+
+        assignments = ", ".join(f"{field} = ?" for field in fields)
+        values = [changes[field] for field in fields]
+        values.append(resource_id)
+
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                f"""
+                UPDATE dbo.resources
+                SET {assignments}
+                OUTPUT INSERTED.*
+                WHERE id = ?
+                """,
+                values,
+            )
+            row = cursor.fetchone()
+            connection.commit()
+            return _row_to_dict(cursor, row) if row else None
+
+    def delete(self, resource_id: int) -> bool:
+        with get_db_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                "DELETE FROM dbo.resources WHERE id = ?",
+                (resource_id,),
+            )
+            deleted = cursor.rowcount > 0
+            connection.commit()
+            return deleted
+
+
+resource_repository = ResourceRepository()
+
+==========================================
+ARCHIVO: backend/app/routes/__init__.py
+==========================================
 
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\__init__.py
+ARCHIVO: backend/app/routes/auth.py
 ==========================================
+"""Rutas HTTP de autenticación."""
+
+from fastapi import APIRouter, status
+
+from app.schemas.user import Token, UserCreate, UserLogin, UserResponse
+from app.services.auth_service import (
+    AuthServiceDep,
+    CurrentUserDep,
+)
+
+router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 
+@router.post(
+    "/registro",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def registrar_usuario(
+    datos: UserCreate,
+    service: AuthServiceDep,
+) -> UserResponse:
+    return service.registrar(datos)
+
+
+@router.post(
+    "/login",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+)
+def iniciar_sesion(datos: UserLogin, service: AuthServiceDep) -> Token:
+    return service.autenticar(datos)
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+)
+def obtener_perfil(current_user: CurrentUserDep) -> UserResponse:
+    return current_user
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\models\resource.py
+ARCHIVO: backend/app/routes/resources.py
 ==========================================
+"""Rutas HTTP del CRUD de recursos educativos."""
 
+from fastapi import APIRouter, status
 
-
-==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\models\user.py
-==========================================
-from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime
-from app.database import Base
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    role = Column(String, default="estudiante") # estudiante, donante, tutor
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-
-
-==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\models\__init__.py
-==========================================
-
-
-
-==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\routes\auth.py
-==========================================
-
-
-
-==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\routes\resources.py
-==========================================
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
-from app.database import get_db
-from app.models.resource import Resource
-from app.schemas.resource import ResourceCreate, ResourceUpdate, ResourceResponse
+from app.schemas.resource import (
+    ResourceCreate,
+    ResourceResponse,
+    ResourceUpdate,
+)
+from app.services.resource_service import ResourceServiceDep
 
 router = APIRouter(prefix="/resources", tags=["Recursos Educativos"])
 
-# 1. CREATE: Crear un nuevo recurso
-@router.post("/", response_model=ResourceResponse, status_code=status.HTTP_201_CREATED)
-def create_resource(resource: ResourceCreate, db: Session = Depends(get_db)):
-    new_resource = Resource(**resource.model_dump())
-    db.add(new_resource)
-    db.commit()
-    db.refresh(new_resource)
-    return new_resource
 
-# 2. READ ALL: Obtener todos los recursos (con filtro opcional por universidad)
-@router.get("/", response_model=List[ResourceResponse])
-def get_resources(university: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(Resource)
-    if university:
-        query = query.filter(Resource.university == university)
-    return query.all()
-
-# 3. READ ONE: Obtener un solo recurso por ID
-@router.get("/{resource_id}", response_model=ResourceResponse)
-def get_resource(resource_id: int, db: Session = Depends(get_db)):
-    resource = db.query(Resource).filter(Resource.id == resource_id).first()
-    if not resource:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Recurso con ID {resource_id} no encontrado"
-        )
-    return resource
-
-# 4. UPDATE: Actualizar un recurso por ID
-@router.put("/{resource_id}", response_model=ResourceResponse)
-def update_resource(resource_id: int, updated_data: ResourceUpdate, db: Session = Depends(get_db)):
-    query = db.query(Resource).filter(Resource.id == resource_id)
-    resource = query.first()
-    
-    if not resource:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Recurso con ID {resource_id} no encontrado"
-        )
-    
-    # Filtrar solo los campos que enviaron para actualizar
-    update_dict = updated_data.model_dump(exclude_unset=True)
-    query.update(update_dict, synchronize_session=False)
-    db.commit()
-    db.refresh(resource)
-    return resource
-
-# 5. DELETE: Eliminar un recurso por ID
-@router.delete("/{resource_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_resource(resource_id: int, db: Session = Depends(get_db)):
-    resource = db.query(Resource).filter(Resource.id == resource_id).first()
-    if not resource:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Recurso con ID {resource_id} no encontrado"
-        )
-    
-    db.delete(resource)
-    db.commit()
-    return None
+@router.get(
+    "/",
+    response_model=list[ResourceResponse],
+    status_code=status.HTTP_200_OK,
+)
+def listar_recursos(
+    service: ResourceServiceDep,
+    university: str | None = None,
+) -> list[ResourceResponse]:
+    return service.listar(university)
 
 
+@router.post(
+    "/",
+    response_model=ResourceResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def crear_recurso(
+    datos: ResourceCreate,
+    service: ResourceServiceDep,
+) -> ResourceResponse:
+    return service.crear(datos)
+
+
+@router.get(
+    "/{resource_id}",
+    response_model=ResourceResponse,
+    status_code=status.HTTP_200_OK,
+)
+def obtener_recurso(
+    resource_id: int,
+    service: ResourceServiceDep,
+) -> ResourceResponse:
+    return service.obtener(resource_id)
+
+
+@router.put(
+    "/{resource_id}",
+    response_model=ResourceResponse,
+    status_code=status.HTTP_200_OK,
+)
+def actualizar_recurso(
+    resource_id: int,
+    datos: ResourceUpdate,
+    service: ResourceServiceDep,
+) -> ResourceResponse:
+    return service.actualizar(resource_id, datos)
+
+
+@router.delete(
+    "/{resource_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def eliminar_recurso(
+    resource_id: int,
+    service: ResourceServiceDep,
+) -> None:
+    service.eliminar(resource_id)
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\routes\__init__.py
+ARCHIVO: backend/app/schemas/__init__.py
 ==========================================
 
 
+==========================================
+ARCHIVO: backend/app/schemas/user.py
+==========================================
+"""Esquemas Pydantic para usuarios y autenticación."""
 
-==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\schemas\resource.py
-==========================================
-from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr
+
+
+class UserCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+    role: str = "estudiante"
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    full_name: str
+    email: EmailStr
+    role: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+==========================================
+ARCHIVO: backend/app/schemas/resource.py
+==========================================
+"""Esquemas Pydantic para los recursos educativos."""
+
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
+
 
 class ResourceBase(BaseModel):
     title: str
     description: str
-    university: str  # Ej: UNCP, UPLA, UC, Roosevelt
-    category: str    # Ej: Libro, Apunte, Examen, Parcial
-    file_url: Optional[str] = None
+    university: str
+    category: str
+    file_url: str | None = None
+
 
 class ResourceCreate(ResourceBase):
     pass
 
+
 class ResourceUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    university: Optional[str] = None
-    category: Optional[str] = None
-    file_url: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    university: str | None = None
+    category: str | None = None
+    file_url: str | None = None
+
 
 class ResourceResponse(ResourceBase):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
-
+    model_config = ConfigDict(from_attributes=True)
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\schemas\user.py
+ARCHIVO: backend/app/security/__init__.py
 ==========================================
 
 
+==========================================
+ARCHIVO: backend/app/security/jwt.py
+==========================================
+"""Seguridad de contraseñas con argon2-cffi y tokens JWT con PyJWT."""
+
+import os
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any
+
+import jwt
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError, VerifyMismatchError
+from dotenv import load_dotenv
+
+ENV_FILE = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(ENV_FILE)
+
+_password_hasher = PasswordHasher()
+
+JWT_SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY",
+    "clave_super_secreta_runared_jwt_2026_al_menos_32_bytes",
+)
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")
+)
+
+
+def hash_password(password: str) -> str:
+    """Genera un hash Argon2id para la contraseña."""
+    return _password_hasher.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Comprueba una contraseña contra su hash Argon2."""
+    try:
+        return _password_hasher.verify(hashed_password, plain_password)
+    except (VerifyMismatchError, VerificationError):
+        return False
+    except Exception:
+        return False
+
+
+def create_access_token(
+    data: dict[str, Any],
+    expires_delta: timedelta | None = None,
+) -> str:
+    """Firma un JWT incluyendo la fecha de expiración."""
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+
+def decode_access_token(token: str) -> dict[str, Any]:
+    """Decodifica y valida un JWT; lanza jwt.PyJWTError si no es válido."""
+    return jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\schemas\__init__.py
+ARCHIVO: backend/app/services/__init__.py
 ==========================================
-
-
-
-==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\security\jwt.py
-==========================================
-
-
+"""Servicios de lógica de negocio."""
 
 ==========================================
-ARCHIVO: C:\1. RONALDO ARCHIVOS\PROYECTOS\TRABAJO-FINAL-PW\backend\app\security\__init__.py
+ARCHIVO: backend/app/services/exceptions.py
 ==========================================
+"""Excepciones de dominio del backend."""
 
 
+class UsuarioAlreadyExistsError(Exception):
+    """El correo electrónico ya está registrado."""
 
+    def __init__(self, email: str) -> None:
+        self.email = email
+        super().__init__(
+            f"El correo electrónico '{email}' ya está registrado."
+        )
+
+
+class CredencialesInvalidasError(Exception):
+    """El correo o la contraseña no son válidos."""
+
+    def __init__(
+        self,
+        mensaje: str = "Correo o contraseña incorrectos.",
+    ) -> None:
+        super().__init__(mensaje)
+
+
+class TokenInvalidoError(Exception):
+    """El token de acceso está ausente, es inválido o expiró."""
+
+    def __init__(
+        self,
+        mensaje: str = "Token no válido o expirado.",
+    ) -> None:
+        super().__init__(mensaje)
+
+
+class ResourceNotFoundError(Exception):
+    """No existe un recurso educativo con el identificador solicitado."""
+
+    def __init__(self, resource_id: int) -> None:
+        self.resource_id = resource_id
+        super().__init__(
+            f"Recurso con ID {resource_id} no encontrado."
+        )
+
+==========================================
+ARCHIVO: backend/app/services/auth_service.py
+==========================================
+"""Servicio de autenticación y autorización con Argon2 y JWT."""
+
+from typing import Annotated, Any
+
+import jwt
+from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from app.repositories.user_repository import (
+    UserRepository,
+    user_repository,
+)
+from app.schemas.user import (
+    Token,
+    UserCreate,
+    UserLogin,
+    UserResponse,
+)
+from app.security.jwt import (
+    create_access_token,
+    decode_access_token,
+    hash_password,
+    verify_password,
+)
+from app.services.exceptions import (
+    CredencialesInvalidasError,
+    TokenInvalidoError,
+    UsuarioAlreadyExistsError,
+)
+
+security_scheme = HTTPBearer(auto_error=False)
+
+
+class AuthService:
+    """Reglas de negocio para registro, login y usuario actual."""
+
+    def __init__(self, repository: UserRepository | None = None) -> None:
+        self._repository = repository or user_repository
+
+    def registrar(self, datos: UserCreate) -> UserResponse:
+        email = datos.email.lower().strip()
+        if self._repository.exists_email(email):
+            raise UsuarioAlreadyExistsError(email)
+
+        created = self._repository.create(
+            full_name=datos.full_name.strip(),
+            email=email,
+            password_hash=hash_password(datos.password),
+            role=datos.role.strip() or "estudiante",
+        )
+        return self._to_response(created)
+
+    def autenticar(self, datos: UserLogin) -> Token:
+        email = datos.email.lower().strip()
+        user = self._repository.get_by_email(email)
+        if user is None or not verify_password(
+            datos.password,
+            user["password_hash"],
+        ):
+            raise CredencialesInvalidasError()
+
+        access_token = create_access_token(
+            data={
+                "sub": str(user["id"]),
+                "email": user["email"],
+            }
+        )
+        return Token(
+            access_token=access_token,
+            token_type="bearer",
+            user=self._to_response(user),
+        )
+
+    def obtener_usuario_actual(self, token: str) -> UserResponse:
+        try:
+            payload = decode_access_token(token)
+            subject = payload.get("sub")
+            if subject is None:
+                raise TokenInvalidoError(
+                    "Token inválido: identificador ausente."
+                )
+            user_id = int(subject)
+        except (jwt.PyJWTError, TypeError, ValueError) as exc:
+            raise TokenInvalidoError(
+                "Token no válido o expirado."
+            ) from exc
+
+        user = self._repository.get_by_id(user_id)
+        if user is None:
+            raise TokenInvalidoError(
+                "El usuario asociado al token ya no existe."
+            )
+        return self._to_response(user)
+
+    @staticmethod
+    def _to_response(user: dict[str, Any]) -> UserResponse:
+        return UserResponse(
+            id=int(user["id"]),
+            full_name=str(user["full_name"]),
+            email=str(user["email"]),
+            role=str(user["role"]),
+            created_at=user["created_at"],
+        )
+
+
+auth_service = AuthService()
+
+
+def get_auth_service() -> AuthService:
+    return auth_service
+
+
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
+
+def get_current_user(
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None,
+        Depends(security_scheme),
+    ],
+    service: AuthServiceDep,
+) -> UserResponse:
+    if credentials is None or not credentials.credentials:
+        raise TokenInvalidoError(
+            "Cabecera de autenticación Bearer requerida."
+        )
+    return service.obtener_usuario_actual(credentials.credentials)
+
+
+CurrentUserDep = Annotated[UserResponse, Depends(get_current_user)]
+
+==========================================
+ARCHIVO: backend/app/services/resource_service.py
+==========================================
+"""Servicio del CRUD de recursos educativos."""
+
+from typing import Annotated, Any
+
+from fastapi import Depends
+
+from app.repositories.resource_repository import (
+    ResourceRepository,
+    resource_repository,
+)
+from app.schemas.resource import (
+    ResourceCreate,
+    ResourceResponse,
+    ResourceUpdate,
+)
+from app.services.exceptions import ResourceNotFoundError
+
+
+class ResourceService:
+    """Reglas de negocio del catálogo de recursos."""
+
+    def __init__(
+        self,
+        repository: ResourceRepository | None = None,
+    ) -> None:
+        self._repository = repository or resource_repository
+
+    def listar(self, university: str | None = None) -> list[ResourceResponse]:
+        return [
+            self._to_response(row)
+            for row in self._repository.list(university)
+        ]
+
+    def obtener(self, resource_id: int) -> ResourceResponse:
+        row = self._repository.get(resource_id)
+        if row is None:
+            raise ResourceNotFoundError(resource_id)
+        return self._to_response(row)
+
+    def crear(self, datos: ResourceCreate) -> ResourceResponse:
+        row = self._repository.create(**datos.model_dump())
+        return self._to_response(row)
+
+    def actualizar(
+        self,
+        resource_id: int,
+        datos: ResourceUpdate,
+    ) -> ResourceResponse:
+        changes = datos.model_dump(exclude_unset=True)
+        row = self._repository.update(resource_id, changes)
+        if row is None:
+            raise ResourceNotFoundError(resource_id)
+        return self._to_response(row)
+
+    def eliminar(self, resource_id: int) -> None:
+        if not self._repository.delete(resource_id):
+            raise ResourceNotFoundError(resource_id)
+
+    @staticmethod
+    def _to_response(row: dict[str, Any]) -> ResourceResponse:
+        return ResourceResponse(
+            id=int(row["id"]),
+            title=str(row["title"]),
+            description=str(row["description"]),
+            university=str(row["university"]),
+            category=str(row["category"]),
+            file_url=row["file_url"],
+            created_at=row["created_at"],
+        )
+
+
+resource_service = ResourceService()
+
+
+def get_resource_service() -> ResourceService:
+    return resource_service
+
+
+ResourceServiceDep = Annotated[
+    ResourceService,
+    Depends(get_resource_service),
+]
+
+==========================================
+ARCHIVO: backend/.env.example
+==========================================
+# Configuración de conexión a SQL Server
+DB_DRIVER=ODBC Driver 18 for SQL Server
+DB_SERVER=DESKTOP-K8VT9OI
+DB_NAME=RunaRedBD
+DB_TRUSTED_CONNECTION=yes
+DB_TRUST_SERVER_CERTIFICATE=yes
+
+# Configuración de seguridad y JWT
+JWT_SECRET_KEY=clave_super_secreta_runared_jwt_2026_al_menos_32_bytes
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440

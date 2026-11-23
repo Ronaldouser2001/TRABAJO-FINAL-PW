@@ -1,27 +1,32 @@
-from pydantic import BaseModel
-from typing import Optional
+"""Esquemas Pydantic para los recursos educativos."""
+
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
+
 
 class ResourceBase(BaseModel):
     title: str
     description: str
-    university: str  # Ej: UNCP, UPLA, UC, Roosevelt
-    category: str    # Ej: Libro, Apunte, Examen, Parcial
-    file_url: Optional[str] = None
+    university: str
+    category: str
+    file_url: str | None = None
+
 
 class ResourceCreate(ResourceBase):
     pass
 
+
 class ResourceUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    university: Optional[str] = None
-    category: Optional[str] = None
-    file_url: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    university: str | None = None
+    category: str | None = None
+    file_url: str | None = None
+
 
 class ResourceResponse(ResourceBase):
     id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

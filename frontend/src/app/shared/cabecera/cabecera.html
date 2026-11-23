@@ -1,35 +1,36 @@
 <header class="cabecera">
   <div class="barra">
-    <a routerLink="/" class="marca">
-      <strong>RunaRed · Huancayo</strong>
-      <span>Comunidad académica</span>
-    </a>
-
+    <a routerLink="/" class="marca"
+      ><strong>RunaRed · Huancayo</strong><span>Recursos educativos</span></a
+    >
     <nav aria-label="Navegación principal">
       <a
         routerLink="/"
         routerLinkActive="activo"
-        [routerLinkActiveOptions]="{ exact: true }"
-        ariaCurrentWhenActive="page">
-        Inicio
-      </a>
-
+        [routerLinkActiveOptions]="{exact:true}"
+        ariaCurrentWhenActive="page"
+        >Inicio</a
+      >
       <a
         routerLink="/recursos"
         routerLinkActive="activo"
-        ariaCurrentWhenActive="page">
-        Recursos
-      </a>
+        ariaCurrentWhenActive="page"
+        >Recursos</a
+      >
     </nav>
-
     <div class="acciones">
-      <a routerLink="/login" class="boton-ingresar">
-        Iniciar sesión
-      </a>
-
-      <a routerLink="/registro" class="boton-registro">
-        Registrarme
-      </a>
+      @if(auth.isAuthenticated()){
+      <span class="usuario">Hola, {{auth.currentUser()?.full_name}}</span>
+      <a routerLink="/gestion-recursos/nuevo" class="boton-publicar"
+        >Publicar recurso</a
+      >
+      <button type="button" class="boton-sesion" (click)="cerrarSesion()">
+        Cerrar sesión
+      </button>
+      } @else {
+      <a routerLink="/login" class="boton-sesion">Iniciar sesión</a>
+      <a routerLink="/registro" class="boton-publicar">Registrarse</a>
+      }
     </div>
   </div>
 </header>

@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-
+import { Component } from "@angular/core";
+import { RouterLink } from "@angular/router";
 @Component({
-  imports: [],
-  selector: 'app-pie',
-  styleUrl: './pie.css',
-  templateUrl: './pie.html',
+  selector: "app-pie",
+  standalone: true,
+  imports: [RouterLink],
+  templateUrl: "./pie.html",
+  styleUrl: "./pie.css",
 })
 export class Pie {}

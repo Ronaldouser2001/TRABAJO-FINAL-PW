@@ -1,0 +1,62 @@
+<section class="rr-form" aria-labelledby="titulo-login">
+  <a class="rr-link" routerLink="/">← Volver al inicio</a>
+
+  <div class="rr-card" style="margin-top: 24px">
+    <span class="rr-kicker">Comunidad RunaRed</span>
+    <h1 id="titulo-login">Iniciar sesión</h1>
+    <p>Accede para publicar y gestionar los recursos educativos.</p>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="enviar()"
+      novalidate
+      [attr.aria-busy]="cargando()"
+    >
+      <fieldset [disabled]="cargando()" class="rr-fieldset">
+        <label for="login-email">Correo electrónico *</label
+        ><input
+          id="login-email"
+          class="rr-input"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          maxlength="254"
+          required
+          [attr.aria-invalid]="invalido('email')"
+          aria-describedby="login-email-error"
+        />
+        @if(invalido('email')){
+        <p class="rr-error" id="login-email-error">
+          Escribe un correo electrónico válido.
+        </p>
+        }
+
+        <label for="login-password">Contraseña *</label
+        ><input
+          id="login-password"
+          class="rr-input"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          maxlength="128"
+          required
+          [attr.aria-invalid]="invalido('password')"
+          aria-describedby="login-password-error"
+        />
+        @if(invalido('password')){
+        <p class="rr-error" id="login-password-error">
+          Escribe tu contraseña.
+        </p>
+        } @if(error()){
+        <p class="rr-error" role="alert">{{error()}}</p>
+        }
+
+        <div class="rr-actions">
+          <button class="rr-btn" type="submit">
+            {{cargando()?'Ingresando…':'Iniciar sesión'}}</button
+          ><a class="rr-btn secondary" routerLink="/registro">Crear cuenta</a>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</section>
